@@ -10,8 +10,6 @@ export const databaseProviders = [
         port: 27017,
         database: 'test',
         entities: ['src/entity/*.ts', './build/src/entity/*.js'],
-        // entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-        synchronize: true,
       }),
   },
 ];
