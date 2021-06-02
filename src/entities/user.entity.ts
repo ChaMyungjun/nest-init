@@ -1,17 +1,27 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ObjectIdColumn,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { IsString, IsNumber } from 'class-validator';
+import { ObjectId } from 'mongoose';
 
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
-  id: number;
+  @ObjectIdColumn()
+  id: ObjectId;
   @Column()
   @IsString()
-  readonly name: string;
+  name: string;
   @Column()
   @IsNumber()
-  readonly age: number;
+  age: number;
   @Column()
   @IsString()
-  readonly breed: string;
+  email: string;
+  @Column()
+  @IsString()
+  password: string;
 }
