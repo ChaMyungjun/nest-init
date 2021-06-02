@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
@@ -23,15 +23,12 @@ export class UsersService {
     await this.userRepository.delete(id);
   }
 
-  // async create(CreateUserDto: CreateUserDto): Promise<User> {
-  //   (await this.userRepository.find().exec()).map((cur: any) => {
-  //     if (
-  //       cur.name === CreateUserDto.name ||
-  //       cur.email === CreateUserDto.email
-  //     ) {
-  //       throw new BadRequestException('Already Exists Member');
-  //     }
-  //   });
-  //   return createdUser.save();
-  // }
+  async create(CreateUserDto: CreateUserDto): Promise<any> {
+    const user = new User();
+    user.name = CreateUserDto.name;
+    user.email = CreateUserDto.email;
+    user.password = CreateUserDto.password;
+
+    return this.userRepository.save(user);
+  }
 }
