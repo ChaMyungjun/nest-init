@@ -1,4 +1,9 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
@@ -29,6 +34,24 @@ export class UsersService {
     user.email = CreateUserDto.email;
     user.password = CreateUserDto.password;
 
-    return this.userRepository.save(user);
+    console.log(user);
+
+    const index = (await this.findAll()).find(
+      (cur: any) => cur.name === user.name || cur.email === user.email,
+    );
+
+    if (index) {
+      throw new BadRequestException();
+    } else {
+      return this.userRepository.save(user);
+    }
+
+    // throw new HttpException(
+    //   {
+    //     status: HttpStatus.FORBIDDEN,
+    //     error: 'This is a custom message',
+    //   },
+    //   HttpStatus.FORBIDDEN,
+    // );
   }
 }
