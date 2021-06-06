@@ -1,8 +1,8 @@
 import {
   Injectable,
   BadRequestException,
-  HttpException,
-  HttpStatus,
+  // HttpException,
+  // HttpStatus,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -21,7 +21,8 @@ export class UsersService {
     return this.userRepository.find();
   }
 
-  findOne(id: number): Promise<User> {
+  async findOne(id: number): Promise<User> {
+    console.log(id);
     return this.userRepository.findOne(id);
   }
 
@@ -57,7 +58,6 @@ export class UsersService {
   }
 
   async update(id: number, UpdateUserDto: UpdateUserDto): Promise<any> {
-    console.log('asdfasdfadsf', id, UpdateUserDto);
     const index = await this.findOne(id);
     console.log(index);
     if (!index) {
