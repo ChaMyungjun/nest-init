@@ -11,5 +11,17 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "incremental": true
+    // path setting
+    // "paths": {
+    //   "api/*": ["api/*"],
+    //   "public/*": ["public/*"],
+    //   "components/*": ["components/*"],
+    //   "containers/*": ["containers/*"],
+    //   "utils/*": ["utils/*"],
+    //   "static/*": ["static/*"],
+    //   "layout/*": ["layout/*"],
+    //   "interfaces/*": ["interfaces/*"],
+    //   "stores/*": ["stores/*"]
+    // }
   }
 }
