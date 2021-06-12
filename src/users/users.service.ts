@@ -45,7 +45,9 @@ export class UsersService {
     if (index) {
       throw new BadRequestException();
     } else {
-      return this.userRepository.save(user);
+      // return this.userRepository.save(user);
+      this.userRepository.save(user);
+      return 'success';
     }
 
     // throw new HttpException(
