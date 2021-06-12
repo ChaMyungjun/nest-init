@@ -6,6 +6,8 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import jwt from 'jsonwebtoken';
+
 import { User } from '../entities/user.entity';
 import { CreateUserDto } from './../dto/CreateUser.dto';
 import { UpdateUserDto } from './../dto/UpdateUser.dto';
@@ -42,11 +44,27 @@ export class UsersService {
       (cur: any) => cur.name === user.name || cur.email === user.email,
     );
 
+    // function token() {
+    //   return new Promise(async (resolve, reject) => {
+    //     await jwt.sign(
+    //       {
+    //         exp: Math.floor(Date.now() / 1000) + 60 * 60,
+    //         data: 'foobar',
+    //       },
+    //       'secret',
+    //     );
+    //   });
+    // }
+
+    // const testJwt = await token();
+    // console.log(testJwt);
+
     if (index) {
       throw new BadRequestException();
     } else {
       // return this.userRepository.save(user);
       this.userRepository.save(user);
+
       return 'success';
     }
 
