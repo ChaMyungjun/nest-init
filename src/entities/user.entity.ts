@@ -24,4 +24,10 @@ export class User {
   @Column()
   @IsString()
   password: string;
+
+  @Column()
+  access_token: string;
+
+  @Column()
+  refresh_token: string;
 }

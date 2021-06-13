@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
 
 import { UsersModule } from './users/users.module';
 import { User } from './entities/user.entity';
@@ -14,6 +15,11 @@ import { User } from './entities/user.entity';
       database: 'test',
       // entities: ['src/entity/*.ts', './build/src/entity/*.js'],
       entities: [User],
+    }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: process.env.NODE_ENV === 'dev' ? '.env.dev' : '.env.test',
+      ignoreEnvFile: process.env.NODE_ENV === 'prod', // prod할 때는 heroku에 따로 넣기로
     }),
   ],
 })
