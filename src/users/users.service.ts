@@ -10,6 +10,7 @@ import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { CreateUserDto } from './../dto/CreateUser.dto';
 import { UpdateUserDto } from './../dto/UpdateUser.dto';
+import { LoginUserDto } from './../dto/Loginuser.dto';
 import { generateToken, generateRefresh } from './jwtFunc';
 import { ConfigService } from '@nestjs/config';
 
@@ -26,7 +27,6 @@ export class UsersService {
   }
 
   async findOne(id: number): Promise<User> {
-    console.log(id);
     return this.userRepository.findOne(id);
   }
 
@@ -35,7 +35,6 @@ export class UsersService {
   }
 
   async create(CreateUserDto: CreateUserDto): Promise<any> {
-    console.log(this.config.get('TOKEN_SECRET'));
     const access_token = generateToken(this.config.get('TOKEN_SECRET'));
     const refresh_token = generateRefresh(this.config.get('TOKEN_SECRET'));
 
@@ -73,6 +72,24 @@ export class UsersService {
       throw new BadRequestException();
     } else {
       return this.userRepository.update(id, UpdateUserDto);
+    }
+  }
+
+  async login(userData: LoginUserDto): Promise<any> {
+    const index = (await this.findAll()).find(
+      (cur) =>
+        cur.email === userData.email && cur.password === userData.password,
+    );
+    if (!index) {
+      throw new BadRequestException();
+    } else {
+      const updateToken = index;
+      const access_token = generateToken(this.config.get('TOKEN_SECRET'));
+      const refresh_token = generateRefresh(this.config.get('TOKEN_SECRET'));
+      updateToken.access_token = access_token;
+      updateToken.refresh_token = refresh_token;
+      this.userRepository.update(Number(index.id), updateToken);
+      return { access: access_token, refresh_token: refresh_token };
     }
   }
 }
