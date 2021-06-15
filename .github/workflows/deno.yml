@@ -1,12 +1,60 @@
-# This workflow uses actions that are not certified by GitHub.
+# # This workflow uses actions that are not certified by GitHub.
+# # They are provided by a third-party and are governed by
+# # separate terms of service, privacy policy, and support
+# # documentation.
+
+# # This workflow will install Deno and run tests across stable and canary builds on Windows, Ubuntu and macOS.
+# # For more information see: https://github.com/denoland/setup-deno
+
+# name: Deno
+
+# on:
+#   push:
+#     branches: [master]
+#   pull_request:
+#     branches: [master]
+
+# jobs:
+#   test:
+#     runs-on: ${{ matrix.os }} # runs a test on Ubuntu, Windows and macOS
+
+#     strategy:
+#       matrix:
+#         deno: ["v1.x", "canary"]
+#         os: [macOS-latest, windows-latest, ubuntu-latest]
+
+#     steps:
+#       - name: Setup repo
+#         uses: actions/checkout@v2
+
+#       - name: Setup Deno
+#         # uses: denoland/setup-deno@v1
+#         uses: denoland/setup-deno@4a4e59637fa62bd6c086a216c7e4c5b457ea9e79
+#         with:
+#           deno-version: ${{ matrix.deno }} # tests across multiple Deno versions
+
+#       # Uncomment this step to verify the use of 'deno fmt' on each commit.
+#       # - name: Verify formatting
+#       #   run: deno fmt --check
+
+#       - name: Run linter
+#         run: deno lint
+
+#       - name: Cache dependencies
+#         run: deno cache deps.ts
+
+#       - name: Run tests
+#         run: deno test -A --unstable
+
+코드를 # This workflow uses actions that are not certified by GitHub.
 # They are provided by a third-party and are governed by
 # separate terms of service, privacy policy, and support
 # documentation.
 
-# This workflow will install Deno and run tests across stable and canary builds on Windows, Ubuntu and macOS.
-# For more information see: https://github.com/denoland/setup-deno
+# This workflow will install Deno and run tests across stable and nightly builds on Windows, Ubuntu and macOS.
+# For more information see: https://github.com/denolib/setup-deno
 
-name: Deno
+name: CI
 
 on:
   push:
@@ -15,33 +63,22 @@ on:
     branches: [master]
 
 jobs:
-  test:
-    runs-on: ${{ matrix.os }} # runs a test on Ubuntu, Windows and macOS
-
-    strategy:
-      matrix:
-        deno: ["v1.x", "canary"]
-        os: [macOS-latest, windows-latest, ubuntu-latest]
-
+  deploy:
+    runs-on: ubuntu-latest
     steps:
-      - name: Setup repo
-        uses: actions/checkout@v2
-
-      - name: Setup Deno
-        # uses: denoland/setup-deno@v1
-        uses: denoland/setup-deno@4a4e59637fa62bd6c086a216c7e4c5b457ea9e79
+      - name: Deploy
+        uses: appleboy/ssh-action@master
         with:
-          deno-version: ${{ matrix.deno }} # tests across multiple Deno versions
-
-      # Uncomment this step to verify the use of 'deno fmt' on each commit.
-      # - name: Verify formatting
-      #   run: deno fmt --check
-
-      - name: Run linter
-        run: deno lint
-
-      - name: Cache dependencies
-        run: deno cache deps.ts
-
-      - name: Run tests
-        run: deno test -A --unstable
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            cd 배포대상 디렉토리명
+            git pull https://깃토큰값@github.com/깃허브아이디/프로젝트명.git
+      - name: send custom message with args
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO_ID }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          args: ${{ github.actor }} 님 소스 웹서버 반영 완료 됐어요.
