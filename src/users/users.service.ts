@@ -5,13 +5,13 @@ import {
   // HttpStatus,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { JwtService } from '@nestjs/jwt';
 import { Repository } from 'typeorm';
-
+import { randomBytes } from 'crypto';
 import { User } from '../entities/user.entity';
 import { CreateUserDto } from './../dto/CreateUser.dto';
 import { UpdateUserDto } from './../dto/UpdateUser.dto';
 import { LoginUserDto } from './../dto/Loginuser.dto';
-import { generateToken, generateRefresh } from './jwtFunc';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -20,6 +20,7 @@ export class UsersService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private readonly config: ConfigService,
+    private readonly jwtService: JwtService,
   ) {}
 
   findAll(): Promise<User[]> {
@@ -35,15 +36,14 @@ export class UsersService {
   }
 
   async create(CreateUserDto: CreateUserDto): Promise<any> {
-    const access_token = generateToken(this.config.get('TOKEN_SECRET'));
-    const refresh_token = generateRefresh(this.config.get('TOKEN_SECRET'));
+    const token = this.createToken();
 
     const user = new User();
     user.name = CreateUserDto.name;
     user.email = CreateUserDto.email;
     user.password = CreateUserDto.password;
-    user.access_token = access_token;
-    user.refresh_token = access_token;
+    user.access_token = (await token).accessToken;
+    user.refresh_token = (await token).refreshToken;
 
     const index = (await this.findAll()).find(
       (cur: any) => cur.name === user.name || cur.email === user.email,
@@ -53,7 +53,8 @@ export class UsersService {
       throw new BadRequestException();
     } else {
       this.userRepository.save(user);
-      return { access: access_token, refresh: refresh_token };
+      return {};
+      // return { access: access_token, refresh: refresh_token };
     }
 
     // throw new HttpException(
@@ -76,6 +77,8 @@ export class UsersService {
   }
 
   async login(userData: LoginUserDto): Promise<any> {
+    const token = this.createToken();
+
     const index = (await this.findAll()).find(
       (cur) =>
         cur.email === userData.email && cur.password === userData.password,
@@ -84,12 +87,33 @@ export class UsersService {
       throw new BadRequestException();
     } else {
       const updateToken = index;
-      const access_token = generateToken(this.config.get('TOKEN_SECRET'));
-      const refresh_token = generateRefresh(this.config.get('TOKEN_SECRET'));
+      const access_token = (await token).accessToken;
+      const refresh_token = (await token).refreshToken;
       updateToken.access_token = access_token;
       updateToken.refresh_token = refresh_token;
       this.userRepository.update(Number(index.id), updateToken);
       return { access: access_token, refresh_token: refresh_token };
     }
+  }
+
+  async createToken() {
+    const access_random = randomBytes(21).toString('base64').slice(0, 21);
+    const refresh_random = randomBytes(21).toString('base64').slice(0, 21);
+    const access: string = access_random;
+    const refresh: string = refresh_random;
+
+    const accessToken = this.jwtService.sign({ access: access });
+    const refreshToken = this.jwtService.sign({ refresh: refresh });
+
+    return {
+      accessToken,
+      refreshToken,
+    };
+  }
+
+  async validateUser(payload: string): Promise<any> {
+    // put some validation logic here
+    // for example query user by id/email/username
+    return {};
   }
 }
