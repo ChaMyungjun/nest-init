@@ -9,16 +9,19 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private readonly usersService: UsersService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ignoreExpiration: false,
       secretOrKey: 'secretKey',
     });
   }
 
   // eslint-disable-next-line @typescript-eslint/ban-types
-  async validate(payload: string, done: Function) {
-    const user = await this.authService.validateUser(payload);
-    if (!user) {
-      return done(new UnauthorizedException(), false);
-    }
-    done(null, user);
+  async validate(payload: any, done: Function) {
+    console.log(payload);
+    return payload;
+    // const user = await this.usersService.validateUser(payload);
+    // if (!user) {
+    //   return done(new UnauthorizedException(), false);
+    // }
+    // done(null, user);
   }
 }

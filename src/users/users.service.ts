@@ -66,14 +66,15 @@ export class UsersService {
     // );
   }
 
-  async update(id: number, UpdateUserDto: UpdateUserDto): Promise<any> {
-    const index = await this.findOne(id);
-    console.log(index);
-    if (!index) {
-      throw new BadRequestException();
-    } else {
-      return this.userRepository.update(id, UpdateUserDto);
-    }
+  async update(UpdateUserDto: UpdateUserDto): Promise<any> {
+    console.log(UpdateUserDto);
+    // const index = await this.findOne(id);
+    // console.log(index);
+    // if (!index) {
+    //   throw new BadRequestException();
+    // } else {
+    //   return this.userRepository.update(id, UpdateUserDto);
+    // }
   }
 
   async login(userData: LoginUserDto): Promise<any> {
@@ -112,8 +113,7 @@ export class UsersService {
   }
 
   async validateUser(payload: string): Promise<any> {
-    // put some validation logic here
-    // for example query user by id/email/username
-    return {};
+    console.log('asdfasdf');
+    // return {};
   }
 }
