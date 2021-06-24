@@ -42,7 +42,7 @@ export class UsersController {
   }
 
   @Put()
-  @UseGuards(AuthGuard('local'))
+  @UseGuards(AuthGuard('jwt'))
   async update(@Request() req, @Body() updateData: UpdateUserDto) {
     console.log(req);
   }
