@@ -113,7 +113,8 @@ export class UsersService {
   }
 
   async validateUser(payload: string): Promise<any> {
-    console.log('asdfasdf');
-    // return {};
+    if (payload) {
+      return payload;
+    }
   }
 }
