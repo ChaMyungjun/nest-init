@@ -112,9 +112,17 @@ export class UsersService {
     };
   }
 
-  async validateUser(payload: string): Promise<any> {
-    if (payload) {
-      return payload;
+  async validateUser(username: string, pass: string): Promise<any> {
+    if (username || pass) {
+      console.log(username, pass);
     }
+    // console.log(username, pass);
+    // const user = await this.findOne();
+    // console.log('use', user);
+    // if (user && user.password === pass) {
+    //   const { password, ...result } = user;
+    //   return result;
+    // }
+    return { username, pass };
   }
 }

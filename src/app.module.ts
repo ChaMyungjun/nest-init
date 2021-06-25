@@ -13,7 +13,6 @@ import { User } from './entities/user.entity';
       host: 'localhost',
       port: 27017,
       database: 'test',
-      // entities: ['src/entity/*.ts', './build/src/entity/*.js'],
       entities: [User],
     }),
     ConfigModule.forRoot({

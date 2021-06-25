@@ -9,7 +9,7 @@ import {
   Body,
   Put,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CreateUserDto } from './../dto/CreateUser.dto';
 import { LoginUserDto } from './../dto/Loginuser.dto';
 import { UpdateUserDto } from './../dto/UpdateUser.dto';
@@ -41,8 +41,8 @@ export class UsersController {
     return this.usersService.create(user);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Put()
-  @UseGuards(AuthGuard('jwt'))
   async update(@Request() req, @Body() updateData: UpdateUserDto) {
     console.log(req);
   }

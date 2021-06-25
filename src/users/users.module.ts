@@ -6,6 +6,7 @@ import { User } from '../entities/user.entity';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { LocalStrategy } from './strategies/local.strategy';
 import { PassportModule } from '@nestjs/passport';
 // import { UserProviders } from './user.providers';
 
@@ -16,14 +17,11 @@ import { PassportModule } from '@nestjs/passport';
     PassportModule,
     JwtModule.register({
       secretOrPrivateKey: 'secretKey',
-      signOptions: {
-        expiresIn: 3600,
-      },
     }),
-    PassportModule.register({ defaultStrategy: 'jwt', session: true }),
+    // PassportModule.register({ defaultStrategy: 'jwt', session: true }),
   ],
   controllers: [UsersController],
-  providers: [UsersService, JwtStrategy],
-  exports: [TypeOrmModule, JwtModule],
+  providers: [UsersService, JwtStrategy, LocalStrategy],
+  exports: [UsersService],
 })
 export class UsersModule {}
