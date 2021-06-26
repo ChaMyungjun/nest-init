@@ -66,15 +66,14 @@ export class UsersService {
     // );
   }
 
-  async update(UpdateUserDto: UpdateUserDto): Promise<any> {
-    console.log(UpdateUserDto);
-    // const index = await this.findOne(id);
-    // console.log(index);
-    // if (!index) {
-    //   throw new BadRequestException();
-    // } else {
-    //   return this.userRepository.update(id, UpdateUserDto);
-    // }
+  async update(UpdateUserDto: UpdateUserDto, req: any): Promise<any> {
+    const UserId = req.user.id;
+    const index = await this.findOne(UserId);
+    if (!index) {
+      throw new BadRequestException();
+    } else {
+      return this.userRepository.update(UserId, UpdateUserDto);
+    }
   }
 
   async login(userData: LoginUserDto): Promise<any> {
@@ -92,7 +91,8 @@ export class UsersService {
       const refresh_token = (await token).refreshToken;
       updateToken.access_token = access_token;
       updateToken.refresh_token = refresh_token;
-      this.userRepository.update(Number(index.id), updateToken);
+      console.log(updateToken);
+      await this.userRepository.update(Number(index.id), updateToken);
       return { access: access_token, refresh_token: refresh_token };
     }
   }
@@ -114,7 +114,7 @@ export class UsersService {
 
   async validateUser(username: string, pass: string): Promise<any> {
     if (username || pass) {
-      console.log(username, pass);
+      // console.log(username, pass);
     }
     // console.log(username, pass);
     // const user = await this.findOne();
