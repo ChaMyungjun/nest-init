@@ -8,6 +8,7 @@ import {
   Post,
   Body,
   Put,
+  Req,
 } from '@nestjs/common';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CreateUserDto } from './../dto/CreateUser.dto';
@@ -44,7 +45,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Put()
   async update(@Request() req, @Body() updateData: UpdateUserDto) {
-    console.log(req);
+    return this.usersService.update(updateData, req);
   }
 
   @Post('/login')
