@@ -19,13 +19,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-    console.log(payload);
+    // console.log(payload.exp);
+    // const JwtExpDate = new Date(payload.exp);
+    // console.log(JwtExpDate);
     const findUser = await this.usersService.findAll();
     const user = findUser.find((cur: any) => {
       const findTokenUser: any = this.jwtService.decode(cur.access_token);
       return findTokenUser.access == payload.access;
     });
-    console.log(user);
     return user;
   }
 }

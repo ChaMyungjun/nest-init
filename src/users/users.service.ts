@@ -72,13 +72,13 @@ export class UsersService {
     if (!index) {
       throw new BadRequestException();
     } else {
-      return this.userRepository.update(UserId, UpdateUserDto);
+      this.userRepository.update(UserId, UpdateUserDto);
+      return UpdateUserDto;
     }
   }
 
   async login(userData: LoginUserDto): Promise<any> {
     const token = this.createToken();
-
     const index = (await this.findAll()).find(
       (cur) =>
         cur.email === userData.email && cur.password === userData.password,
@@ -86,14 +86,16 @@ export class UsersService {
     if (!index) {
       throw new BadRequestException();
     } else {
-      const updateToken = index;
+      const updateToken: any = index;
       const access_token = (await token).accessToken;
       const refresh_token = (await token).refreshToken;
       updateToken.access_token = access_token;
       updateToken.refresh_token = refresh_token;
-      console.log(updateToken);
-      await this.userRepository.update(Number(index.id), updateToken);
-      return { access: access_token, refresh_token: refresh_token };
+      this.userRepository.update(updateToken.id, updateToken);
+      return {
+        acces: updateToken.access_token,
+        refresh: updateToken.refresh_token,
+      };
     }
   }
 
@@ -103,7 +105,10 @@ export class UsersService {
     const access: string = access_random;
     const refresh: string = refresh_random;
 
-    const accessToken = this.jwtService.sign({ access: access });
+    const accessToken = this.jwtService.sign(
+      { access: access },
+      // { expiresIn: '1h' },
+    );
     const refreshToken = this.jwtService.sign({ refresh: refresh });
 
     return {
