@@ -21,20 +21,21 @@ import { UsersService } from './users.service';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  // @Get()
+  // async findAll(): Promise<User[]> {
+  //   return this.usersService.findAll();
+  // }
+
+  @UseGuards(JwtAuthGuard)
   @Get()
-  async findAll(): Promise<User[]> {
-    return this.usersService.findAll();
+  async findId(@Request() req): Promise<User> {
+    return this.usersService.findOne(req);
   }
 
-  @Get(':id')
-  async findId(@Param() userId: number): Promise<User> {
-    console.log(userId);
-    return this.usersService.findOne(userId);
-  }
-
-  @Delete(':id')
-  async removeId(@Param() userId: number): Promise<void> {
-    return this.usersService.remove(userId);
+  @UseGuards(JwtAuthGuard)
+  @Delete()
+  async removeId(@Request() req): Promise<void> {
+    return this.usersService.remove(req);
   }
 
   @Post()

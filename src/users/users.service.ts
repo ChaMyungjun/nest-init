@@ -6,13 +6,14 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import { randomBytes } from 'crypto';
 import { User } from '../entities/user.entity';
 import { CreateUserDto } from './../dto/CreateUser.dto';
 import { UpdateUserDto } from './../dto/UpdateUser.dto';
 import { LoginUserDto } from './../dto/Loginuser.dto';
-import { ConfigService } from '@nestjs/config';
+import { createHashedPassword, makePasswordHashed } from './user.password.hash';
 
 @Injectable()
 export class UsersService {
@@ -27,21 +28,30 @@ export class UsersService {
     return this.userRepository.find();
   }
 
-  async findOne(id: number): Promise<User> {
-    return this.userRepository.findOne(id);
+  async findOne(req: any): Promise<User> {
+    return this.userRepository.findOne(req.user.id);
   }
 
-  async remove(id: number): Promise<void> {
-    await this.userRepository.delete(id);
+  async remove(req: any): Promise<void> {
+    await this.userRepository.delete(req.user.id);
   }
 
   async create(CreateUserDto: CreateUserDto): Promise<any> {
     const token = this.createToken();
+    const HashedPassword: any = await createHashedPassword(
+      CreateUserDto.password,
+      CreateUserDto.passwordConfirm,
+    );
+
+    if (HashedPassword.error) {
+      throw new BadRequestException(HashedPassword.error);
+    }
 
     const user = new User();
     user.name = CreateUserDto.name;
     user.email = CreateUserDto.email;
-    user.password = CreateUserDto.password;
+    user.password = HashedPassword.password;
+    user.salt = HashedPassword.salt;
     user.access_token = (await token).accessToken;
     user.refresh_token = (await token).refreshToken;
 
@@ -53,8 +63,10 @@ export class UsersService {
       throw new BadRequestException();
     } else {
       this.userRepository.save(user);
-      return {};
-      // return { access: access_token, refresh: refresh_token };
+      return {
+        access: await (await token).accessToken,
+        refresh: await (await token).refreshToken,
+      };
     }
 
     // throw new HttpException(
@@ -80,10 +92,12 @@ export class UsersService {
   async login(userData: LoginUserDto): Promise<any> {
     const token = this.createToken();
     const index = (await this.findAll()).find(
-      (cur) =>
-        cur.email === userData.email && cur.password === userData.password,
+      (cur) => cur.email === userData.email,
     );
-    if (!index) {
+
+    const password = await makePasswordHashed(index, userData.password);
+
+    if (!index || index.password !== password) {
       throw new BadRequestException();
     } else {
       const updateToken: any = index;
