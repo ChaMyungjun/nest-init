@@ -5,25 +5,27 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { IsString, IsNumber } from 'class-validator';
-import { ObjectId } from 'mongoose';
 
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
   @ObjectIdColumn()
-  id: ObjectId;
-  @Column()
+  id: number;
+  @Column({ unique: true })
   @IsString()
   name: string;
   @Column()
   @IsNumber()
   age: number;
-  @Column()
+  @Column({ unique: true })
   @IsString()
   email: string;
   @Column()
   @IsString()
   password: string;
+  @Column()
+  @IsString()
+  salt: string | unknown;
 
   @Column()
   access_token: string;
