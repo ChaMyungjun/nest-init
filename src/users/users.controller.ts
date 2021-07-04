@@ -21,10 +21,10 @@ import { UsersService } from './users.service';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  // @Get()
-  // async findAll(): Promise<User[]> {
-  //   return this.usersService.findAll();
-  // }
+  @Get('all')
+  async findAll(): Promise<User[]> {
+    return this.usersService.findAll();
+  }
 
   @UseGuards(JwtAuthGuard)
   @Get()
