@@ -52,10 +52,12 @@ export class UsersController {
     return this.usersService.login(loginUserData);
   }
 
-  //kakao social login
-  //https://kauth.kakao.com/oauth/authorize?response_type=code&client_id={REST_API_KEY}&redirect_uri={REDIRECT_URI}
-  // @Post('/kakao')
-  // async kakao(@Body() loginUserData: LoginUserDto): Promise<void> {
-  //   return this.usersService.login(loginUserData);
-  // }
+  @Post('/login/social')
+  //https://kauth.kakao.com/oauth/authorize?client_id=3040da9b120368bb91958c4d4eb5511e&redirect_uri=http://localhost:3000/user/kakao/auth&response_type=code
+  // http://localhost:3000/user/kakao/auth?code=FbLl2RC97GiQ5eZqmzeE2hqs_1HoFIEEahF8WF95hw-vHtfzlufaddYcBpF3VjHnPwDBJgorDKYAAAF6kSos7g
+
+
+  async socialLogin(@Body() socialLoginData: { code: string }): Promise<any> {
+    console.log(socialLoginData);
+  }
 }
