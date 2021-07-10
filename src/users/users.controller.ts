@@ -4,11 +4,9 @@ import {
   UseGuards,
   Delete,
   Get,
-  Param,
   Post,
   Body,
   Put,
-  Req,
 } from '@nestjs/common';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CreateUserDto } from './../dto/CreateUser.dto';
@@ -53,4 +51,11 @@ export class UsersController {
   async login(@Body() loginUserData: LoginUserDto): Promise<void> {
     return this.usersService.login(loginUserData);
   }
+
+  //kakao social login
+  //https://kauth.kakao.com/oauth/authorize?response_type=code&client_id={REST_API_KEY}&redirect_uri={REDIRECT_URI}
+  // @Post('/kakao')
+  // async kakao(@Body() loginUserData: LoginUserDto): Promise<void> {
+  //   return this.usersService.login(loginUserData);
+  // }
 }
