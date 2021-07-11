@@ -9,10 +9,17 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import { randomBytes } from 'crypto';
+import axios from 'axios';
+
+//entity
 import { User } from '../entities/user.entity';
+
+//userDto
 import { CreateUserDto } from './../dto/CreateUser.dto';
 import { UpdateUserDto } from './../dto/UpdateUser.dto';
 import { LoginUserDto } from './../dto/Loginuser.dto';
+
+//password hashing
 import { createHashedPassword, makePasswordHashed } from './user.password.hash';
 
 @Injectable()
@@ -111,6 +118,27 @@ export class UsersService {
         refresh: updateToken.refresh_token,
       };
     }
+  }
+
+  async socailLogin(code: string): Promise<any> {
+    const options = {
+      Method: 'POST',
+      data: {
+        code: code,
+        grant_type: 'authorization_code',
+        redirect_uri: 'http://localhost:3000/user/kakao/auth',
+        client_id: '3040da9b120368bb91958c4d4eb5511e',
+        client_secret: '1CIxKM87IyErmtYp2G8VnBfxGqPbIPRk',
+      },
+      url: 'https://kauth.kakao.com/oauth/token',
+      header: {
+        'content-type': 'application/x-www-form-urlencoded',
+      },
+    };
+
+    await axios(options)
+      .then((res) => console.log(res.data))
+      .catch((err) => console.log(err.response.data));
   }
 
   async createToken() {
