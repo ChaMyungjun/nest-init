@@ -86,12 +86,11 @@ export class UsersService {
   }
 
   async update(UpdateUserDto: UpdateUserDto, req: any): Promise<any> {
-    const UserId = req.user.id;
-    const index = await this.findOne(UserId);
+    const index = await this.findOne(req);
     if (!index) {
       throw new BadRequestException();
     } else {
-      this.userRepository.update(UserId, UpdateUserDto);
+      this.userRepository.update(req.user.id, UpdateUserDto);
       return UpdateUserDto;
     }
   }
