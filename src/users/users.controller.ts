@@ -53,7 +53,8 @@ export class UsersController {
   }
 
   @Post('/login/social')
-  //https://kauth.kakao.com/oauth/authorize?client_id=3040da9b120368bb91958c4d4eb5511e&redirect_uri=http://localhost:3000/user/kakao/auth&response_type=code
+  //https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=3040da9b120368bb91958c4d4eb5511e&redirect_uri=http://localhost:3000/user/kakao/auth&state=kakao
+  // https://kauth.kakao.com/oauth/authorize?client_id=3040da9b120368bb91958c4d4eb5511e&redirect_uri=http://localhost:3000/user/kakao/auth&state=kakao
   // http://localhost:3000/user/kakao/auth?code=FbLl2RC97GiQ5eZqmzeE2hqs_1HoFIEEahF8WF95hw-vHtfzlufaddYcBpF3VjHnPwDBJgorDKYAAAF6kSos7g
   // https://zionh.tistory.com/40
   async socialLogin(@Body() socialLoginData: { code: string }): Promise<any> {
