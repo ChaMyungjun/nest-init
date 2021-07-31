@@ -120,23 +120,20 @@ export class UsersService {
   }
 
   async socailLogin(code: string): Promise<any> {
-    console.log(code);
-    const options = {
-      Method: 'POST',
-      data: {
-        code: code,
-        grant_type: 'authorization_code',
-        redirect_uri: 'http://localhost:3000/user/kakao/auth',
-        client_id: '3040da9b120368bb91958c4d4eb5511e',
-        client_secret: '34xuf4W6rvKJSIqOfNODkDvcfjWG0Lfh',
-      },
+    await axios({
+      method: 'post',
       url: 'https://kauth.kakao.com/oauth/token',
-      header: {
-        'content-type': 'application/x-www-form-urlencoded',
+      data: {
+        grant_type: 'authorization_code',
+        client_id: '34xuf4W6rvKJSIqOfNODkDvcfjWG0Lfh',
+        redirect_uri: 'http://localhost:3000/user/kakao/auth',
+        code: code,
+        client_secret: '3040da9b120368bb91958c4d4eb5511e',
       },
-    };
-
-    await axios(options)
+      headers: {
+        ContentType: 'application/x-www-form-urlencoded;charset=utf-8',
+      },
+    })
       .then((res) => console.log(res.data))
       .catch((err) => console.log(err.response?.data));
   }
@@ -163,13 +160,6 @@ export class UsersService {
     if (username || pass) {
       // console.log(username, pass);
     }
-    // console.log(username, pass);
-    // const user = await this.findOne();
-    // console.log('use', user);
-    // if (user && user.password === pass) {
-    //   const { password, ...result } = user;
-    //   return result;
-    // }
     return { username, pass };
-  }
+  } 
 }
