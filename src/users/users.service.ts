@@ -120,6 +120,7 @@ export class UsersService {
   }
 
   async socailLogin(code: string): Promise<any> {
+    console.log(code);
     const options = {
       Method: 'POST',
       data: {
@@ -127,7 +128,7 @@ export class UsersService {
         grant_type: 'authorization_code',
         redirect_uri: 'http://localhost:3000/user/kakao/auth',
         client_id: '3040da9b120368bb91958c4d4eb5511e',
-        client_secret: '1CIxKM87IyErmtYp2G8VnBfxGqPbIPRk',
+        client_secret: '34xuf4W6rvKJSIqOfNODkDvcfjWG0Lfh',
       },
       url: 'https://kauth.kakao.com/oauth/token',
       header: {
@@ -137,7 +138,7 @@ export class UsersService {
 
     await axios(options)
       .then((res) => console.log(res.data))
-      .catch((err) => console.log(err.response.data));
+      .catch((err) => console.log(err.response?.data));
   }
 
   async createToken() {
