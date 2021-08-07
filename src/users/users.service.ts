@@ -121,12 +121,16 @@ export class UsersService {
   }
 
   async socailLogin(code: string): Promise<any> {
+    const state = code.split('&')[1].split('=')[1];
+
+    console.log(state);
+
     const url = 'https://kauth.kakao.com/oauth/token';
     const data = {
       grant_type: 'authorization_code',
       client_id: '3040da9b120368bb91958c4d4eb5511e',
       redirect_uri: 'http://localhost:3000/user/kakao/auth',
-      code: code,
+      code: code.split('&')[0],
       client_secret: '34xuf4W6rvKJSIqOfNODkDvcfjWG0Lfh',
     };
     const axiosConfig = {
@@ -137,8 +141,31 @@ export class UsersService {
 
     await axios
       .post(url, qs.stringify(data), axiosConfig)
-      .then((res) => console.log(res.data))
+      .then((res) => {
+        console.log(res.data);
+        if (state === 'kakao') {
+          this.socialUserMe(state, res.data?.access_token);
+        }
+      })
       .catch((err) => console.log(err.response?.data));
+  }
+
+  async socialUserMe(state: string, token) {
+    let user;
+    console.log(token);
+    if (state === 'kakao') {
+      try {
+        const axiosConfig = {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        };
+        user = axios.get('https://kauth.kakao.com/v2/user/me', axiosConfig);
+      } catch (e) {
+        console.log(e.data);
+      }
+    }
+    console.log(await user);
   }
 
   async createToken() {
