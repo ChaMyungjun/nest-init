@@ -9,6 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import { randomBytes } from 'crypto';
+import * as qs from 'qs';
 import axios from 'axios';
 
 //entity
@@ -120,20 +121,22 @@ export class UsersService {
   }
 
   async socailLogin(code: string): Promise<any> {
-    await axios({
-      method: 'post',
-      url: 'https://kauth.kakao.com/oauth/token',
-      data: {
-        grant_type: 'authorization_code',
-        client_id: '34xuf4W6rvKJSIqOfNODkDvcfjWG0Lfh',
-        redirect_uri: 'http://localhost:3000/user/kakao/auth',
-        code: code,
-        client_secret: '3040da9b120368bb91958c4d4eb5511e',
-      },
+    const url = 'https://kauth.kakao.com/oauth/token';
+    const data = {
+      grant_type: 'authorization_code',
+      client_id: '3040da9b120368bb91958c4d4eb5511e',
+      redirect_uri: 'http://localhost:3000/user/kakao/auth',
+      code: code,
+      client_secret: '34xuf4W6rvKJSIqOfNODkDvcfjWG0Lfh',
+    };
+    const axiosConfig = {
       headers: {
-        ContentType: 'application/x-www-form-urlencoded;charset=utf-8',
+        'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
       },
-    })
+    };
+
+    await axios
+      .post(url, qs.stringify(data), axiosConfig)
       .then((res) => console.log(res.data))
       .catch((err) => console.log(err.response?.data));
   }
@@ -161,5 +164,5 @@ export class UsersService {
       // console.log(username, pass);
     }
     return { username, pass };
-  } 
+  }
 }
