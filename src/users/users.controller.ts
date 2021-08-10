@@ -57,4 +57,10 @@ export class UsersController {
   async socialLogin(@Body() socialLoginData: { code: string }): Promise<any> {
     return this.usersService.socailLogin(socialLoginData.code);
   }
+
+  //exmaple clusting testing
+  @Get('/cluster')
+  async cluster(): Promise<any> {
+    return this.usersService.clusrterTesting();
+  }
 }
