@@ -11,6 +11,8 @@ import { Repository } from 'typeorm';
 import { randomBytes } from 'crypto';
 import * as qs from 'qs';
 import axios from 'axios';
+import * as cluster from 'cluster';
+import os from 'os';
 
 //entity
 import { User } from '../entities/user.entity';
@@ -191,5 +193,30 @@ export class UsersService {
       // console.log(username, pass);
     }
     return { username, pass };
+  }
+
+  //cluster testing
+  clusrterTesting() {
+    //cpu num
+    const numCPUs = os?.cpus()?.length;
+
+    if (cluster.isMaster) {
+      console.log(`마스터 프로세스 아이디: ${process.pid}`);
+      for (let i = 0; i < numCPUs; i++) {
+        cluster.fork();
+      }
+
+      //워커 종료
+      cluster.on('exit', (worker, code, signal) => {
+        console.log(`${worker.process.pid}번 워커가 종료 되었습니다`);
+        console.log('code', code, 'signal', signal);
+      });
+    } else {
+      console.log('wow!!');
+    }
+
+    console.log(`${process.pid}번 워커 실행`);
+
+    return process.pid;
   }
 }
