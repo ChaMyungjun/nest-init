@@ -154,17 +154,21 @@ export class UsersService {
 
   async socialUserMe(state: string, token) {
     let user;
-    const axiosConfig = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
+    // const axiosConfig = {
+    //   headers: {
+    //     Authorization: `Bearer ${token}`,
+    //   },
+    // };
 
     if (state === 'kakao') {
       try {
-        user = axios.get('https://kauth.kakao.com/v2/user/me', axiosConfig);
+        user = axios.get('https://kauth.kakao.com/v2/user/me', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
       } catch (e) {
-        console.log(e.data);
+        console.log('error', e.data);
       }
     }
     console.log(await user);
