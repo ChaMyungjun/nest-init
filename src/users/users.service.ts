@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Injectable,
   BadRequestException,
@@ -146,33 +147,44 @@ export class UsersService {
       .then((res) => {
         console.log(res.data);
         if (state === 'kakao') {
-          this.socialUserMe(state, res.data?.access_token);
+          // this.socialUserMe(state, res.data?.access_token);\
+          try {
+            axios
+              .get('https://kauth.kakao.com/v2/user/me', {
+                headers: {
+                  Authorization: `Bearer ${res.data?.access_token}`,
+                },
+              })
+              .then((res) => console.log(res.data));
+          } catch (e) {
+            console.log('error', e.data);
+          }
         }
       })
       .catch((err) => console.log(err.response?.data));
   }
 
-  async socialUserMe(state: string, token) {
-    let user;
-    // const axiosConfig = {
-    //   headers: {
-    //     Authorization: `Bearer ${token}`,
-    //   },
-    // };
+  // async socialUserMe(state: string, token) {
+  //   let user;
+  //   // const axiosConfig = {
+  //   //   headers: {
+  //   //     Authorization: `Bearer ${token}`,
+  //   //   },
+  //   // };
 
-    if (state === 'kakao') {
-      try {
-        user = axios.get('https://kauth.kakao.com/v2/user/me', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-      } catch (e) {
-        console.log('error', e.data);
-      }
-    }
-    console.log(await user);
-  }
+  //   if (state === 'kakao' && token) {
+  //     try {
+  //       user = axios.get('https://kauth.kakao.com/v2/user/me', {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       });
+  //     } catch (e) {
+  //       console.log('error', e.data);
+  //     }
+  //   }
+  //   console.log(await user);
+  // }
 
   async createToken() {
     const access_random = randomBytes(21).toString('base64').slice(0, 21);
