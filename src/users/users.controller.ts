@@ -54,6 +54,7 @@ export class UsersController {
 
   @Post('/login/social')
   //https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=3040da9b120368bb91958c4d4eb5511e&redirect_uri=http://localhost:3000/user/kakao/auth&state=kakao
+  //https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=5qR5A8zgPnt_96xiYSSP&redirect_uri=http://localhost:3000/social/login/naver&state=naver
   async socialLogin(@Body() socialLoginData: { code: string }): Promise<any> {
     return this.usersService.socailLogin(socialLoginData.code);
   }

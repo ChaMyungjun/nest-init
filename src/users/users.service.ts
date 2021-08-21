@@ -126,42 +126,34 @@ export class UsersService {
   async socailLogin(code: string): Promise<any> {
     const state = code.split('&')[1].split('=')[1];
 
-    console.log(state);
+    if (state === 'kakao') {
+      const url = 'https://kauth.kakao.com/oauth/token';
+      const data = {
+        grant_type: 'authorization_code',
+        client_id: '3040da9b120368bb91958c4d4eb5511e',
+        redirect_uri: 'http://localhost:3000/user/kakao/auth',
+        code: code.split('&')[0],
+        client_secret: '34xuf4W6rvKJSIqOfNODkDvcfjWG0Lfh',
+      };
 
-    const url = 'https://kauth.kakao.com/oauth/token';
-    const data = {
-      grant_type: 'authorization_code',
-      client_id: '3040da9b120368bb91958c4d4eb5511e',
-      redirect_uri: 'http://localhost:3000/user/kakao/auth',
-      code: code.split('&')[0],
-      client_secret: '34xuf4W6rvKJSIqOfNODkDvcfjWG0Lfh',
-    };
-    const axiosConfig = {
-      headers: {
-        'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
-      },
-    };
+      const axiosConfig = {
+        headers: {
+          'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
+        },
+      };
 
-    await axios
-      .post(url, qs.stringify(data), axiosConfig)
-      .then((res) => {
-        console.log(res.data);
-        if (state === 'kakao') {
+      await axios
+        .post(url, qs.stringify(data), axiosConfig)
+        .then((res) => {
           this.socialUserMe(state, res.data?.access_token);
-          // try {
-          //   axios
-          //     .get('https://kauth.kakao.com/v2/user/me', {
-          //       headers: {
-          //         Authorization: `Bearer ${res.data?.access_token}`,
-          //       },
-          //     })
-          //     .then((res) => console.log(res.data));
-          // } catch (e) {
-          //   console.log('error', e.data);
-          // }
-        }
-      })
-      .catch((err) => console.log(err.response?.data));
+        })
+        .catch((err) => console.log(err.response?.data));
+    } else if (state === 'naver') {
+      const state = this.radomStringGen(20);
+      const url = `https://nid.naver.com/oauth2.0/token?&client_id=5qR5A8zgPnt_96xiYSSP&client_secret=rWACbM0Adh&grant_type=authorization_code&state=${state}&code=${code}`;
+
+      axios.post(url).then((res) => console.log(res.data))
+    }
   }
 
   async socialUserMe(state: string, token) {
@@ -234,5 +226,17 @@ export class UsersService {
     console.log(`${process.pid}번 워커 실행`);
 
     return process.pid;
+  }
+
+  //for naver state
+  radomStringGen(length) {
+    let result = '';
+    const characters =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
   }
 }
