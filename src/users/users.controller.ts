@@ -93,6 +93,7 @@ export class UsersController {
 
   //https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=3040da9b120368bb91958c4d4eb5511e&redirect_uri=http://localhost:3000/user/kakao/auth&state=kakao
   @ApiResponse({ description: '유저 소셜 로그인 후 정보 저장.', type: User })
+
   async socialLogin(@Body() socialLoginData: { code: string }): Promise<any> {
     return this.usersService.socailLogin(socialLoginData.code);
   }
