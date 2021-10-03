@@ -35,18 +35,21 @@ export class UsersService {
     private readonly jwtService: JwtService,
   ) {}
 
+  //user all find
   findAll(): Promise<User[]> {
     return this.userRepository.find();
   }
 
+  //spect user find
   async findOne(req: any): Promise<User> {
     return this.userRepository.findOne(req.user.id);
   }
 
+  //spect user delete
   async remove(req: any): Promise<void> {
     await this.userRepository.delete(req.user.id);
   }
-
+  //user create
   async create(CreateUserDto: CreateUserDto): Promise<any> {
     const token = this.createToken();
     const HashedPassword: any = await createHashedPassword(
@@ -79,16 +82,9 @@ export class UsersService {
         refresh: await (await token).refreshToken,
       };
     }
-
-    // throw new HttpException(
-    //   {
-    //     status: HttpStatus.FORBIDDEN,
-    //     error: 'This is a custom message',
-    //   },
-    //   HttpStatus.FORBIDDEN,
-    // );
   }
 
+  //spect user update
   async update(UpdateUserDto: UpdateUserDto, req: any): Promise<any> {
     const index = await this.findOne(req);
     if (!index) {
@@ -99,6 +95,7 @@ export class UsersService {
     }
   }
 
+  //user login
   async login(userData: LoginUserDto): Promise<any> {
     const token = this.createToken();
     const index = (await this.findAll()).find(
@@ -123,61 +120,90 @@ export class UsersService {
     }
   }
 
+  //social login kakao && naver
   async socailLogin(code: string): Promise<any> {
     const state = code.split('&')[1].split('=')[1];
 
-    if (state === 'kakao') {
-      const url = 'https://kauth.kakao.com/oauth/token';
-      const data = {
-        grant_type: 'authorization_code',
-        client_id: '3040da9b120368bb91958c4d4eb5511e',
-        redirect_uri: 'http://localhost:3000/user/kakao/auth',
-        code: code.split('&')[0],
-        client_secret: '34xuf4W6rvKJSIqOfNODkDvcfjWG0Lfh',
-      };
+    console.log(code, state, code.split('&')[0]);
 
-      const axiosConfig = {
-        headers: {
-          'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
-        },
-      };
+    const url = 'https://kauth.kakao.com/oauth/token';
+    const data = {
+      grant_type: 'authorization_code',
+      client_id: '3040da9b120368bb91958c4d4eb5511e',
+      redirect_uri: 'http://localhost:3000/user/kakao/auth',
+      code: code.split('&')[0],
+      client_secret: '34xuf4W6rvKJSIqOfNODkDvcfjWG0Lfh',
+    };
+    const axiosConfig = {
+      headers: {
+        'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
+      },
+    };
 
-      await axios
-        .post(url, qs.stringify(data), axiosConfig)
-        .then((res) => {
-          this.socialUserMe(state, res.data?.access_token);
-        })
-        .catch((err) => console.log(err.response?.data));
-    } else if (state === 'naver') {
-      const state = this.radomStringGen(20);
-      const url = `https://nid.naver.com/oauth2.0/token?&client_id=5qR5A8zgPnt_96xiYSSP&client_secret=rWACbM0Adh&grant_type=authorization_code&state=${state}&code=${code}`;
-
-      axios.post(url).then((res) => console.log(res.data))
-    }
+    await axios
+      .post(url, qs.stringify(data), axiosConfig)
+      .then((res) => {
+        // console.log(res.data);
+        if (state === 'kakao') {
+          try {
+            this.socialUserMe(
+              state,
+              res.data?.access_token,
+              res.data?.refresh_token,
+            );
+          } catch (e) {
+            throw new BadRequestException();
+          }
+        }
+      })
+      .catch((err) => {
+        console.log(err.response?.data);
+        throw new BadRequestException();
+      });
   }
 
-  async socialUserMe(state: string, token) {
-    let user;
-    // const axiosConfig = {
-    //   headers: {
-    //     Authorization: `Bearer ${token}`,
-    //   },
-    // };
-
+  //social login me request
+  async socialUserMe(state: string, token, refresh) {
     if (state === 'kakao' && token) {
       try {
-        user = axios.get('https://kauth.kakao.com/v2/user/me', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        axios
+          .get('https://kapi.kakao.com/v2/user/me', {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .then(async (res) => {
+            // const user = new User();
+            const HashedPassword = await createHashedPassword(
+              res.data.id.toString(),
+              res.data.id.toString(),
+            );
+            /**
+             * HashedPassword type
+             *
+             * {salt: string, password: string}
+             *
+             *
+             * {error: string}
+             *
+             */
+
+            console.log(HashedPassword);
+
+            // user.name = res.data.kakao_account.profile.nickname;
+            // user.age = res.data.kakao_account.email;
+            // user.salt = HashedPassword;
+            // user.access_token = token;
+            // user.refresh_token = refresh;
+          })
+          .catch((err) => console.error(err));
       } catch (e) {
         console.log('error', e.data);
       }
     }
-    console.log(await user);
   }
 
+  //access & refresh token generate
   async createToken() {
     const access_random = randomBytes(21).toString('base64').slice(0, 21);
     const refresh_random = randomBytes(21).toString('base64').slice(0, 21);
@@ -196,6 +222,7 @@ export class UsersService {
     };
   }
 
+  //check user validate
   async validateUser(username: string, pass: string): Promise<any> {
     if (username || pass) {
       // console.log(username, pass);
