@@ -35,18 +35,21 @@ export class UsersService {
     private readonly jwtService: JwtService,
   ) {}
 
+  //user all find
   findAll(): Promise<User[]> {
     return this.userRepository.find();
   }
 
+  //spect user find
   async findOne(req: any): Promise<User> {
     return this.userRepository.findOne(req.user.id);
   }
 
+  //spect user delete
   async remove(req: any): Promise<void> {
     await this.userRepository.delete(req.user.id);
   }
-
+  //user create
   async create(CreateUserDto: CreateUserDto): Promise<any> {
     const token = this.createToken();
     const HashedPassword: any = await createHashedPassword(
@@ -79,16 +82,9 @@ export class UsersService {
         refresh: await (await token).refreshToken,
       };
     }
-
-    // throw new HttpException(
-    //   {
-    //     status: HttpStatus.FORBIDDEN,
-    //     error: 'This is a custom message',
-    //   },
-    //   HttpStatus.FORBIDDEN,
-    // );
   }
 
+  //spect user update
   async update(UpdateUserDto: UpdateUserDto, req: any): Promise<any> {
     const index = await this.findOne(req);
     if (!index) {
@@ -99,6 +95,7 @@ export class UsersService {
     }
   }
 
+  //user login
   async login(userData: LoginUserDto): Promise<any> {
     const token = this.createToken();
     const index = (await this.findAll()).find(
@@ -123,10 +120,11 @@ export class UsersService {
     }
   }
 
+  //social login kakao && naver
   async socailLogin(code: string): Promise<any> {
     const state = code.split('&')[1].split('=')[1];
 
-    console.log(state);
+    console.log(code, state, code.split('&')[0]);
 
     const url = 'https://kauth.kakao.com/oauth/token';
     const data = {
@@ -145,47 +143,67 @@ export class UsersService {
     await axios
       .post(url, qs.stringify(data), axiosConfig)
       .then((res) => {
-        console.log(res.data);
+        // console.log(res.data);
         if (state === 'kakao') {
-          this.socialUserMe(state, res.data?.access_token);
-          // try {
-          //   axios
-          //     .get('https://kauth.kakao.com/v2/user/me', {
-          //       headers: {
-          //         Authorization: `Bearer ${res.data?.access_token}`,
-          //       },
-          //     })
-          //     .then((res) => console.log(res.data));
-          // } catch (e) {
-          //   console.log('error', e.data);
-          // }
+          try {
+            this.socialUserMe(
+              state,
+              res.data?.access_token,
+              res.data?.refresh_token,
+            );
+          } catch (e) {
+            throw new BadRequestException();
+          }
         }
       })
-      .catch((err) => console.log(err.response?.data));
+      .catch((err) => {
+        console.log(err.response?.data);
+        throw new BadRequestException();
+      });
   }
 
-  async socialUserMe(state: string, token) {
-    let user;
-    // const axiosConfig = {
-    //   headers: {
-    //     Authorization: `Bearer ${token}`,
-    //   },
-    // };
-
+  //social login me request
+  async socialUserMe(state: string, token, refresh) {
     if (state === 'kakao' && token) {
       try {
-        user = axios.get('https://kauth.kakao.com/v2/user/me', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        axios
+          .get('https://kapi.kakao.com/v2/user/me', {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .then(async (res) => {
+            // const user = new User();
+            const HashedPassword = await createHashedPassword(
+              res.data.id.toString(),
+              res.data.id.toString(),
+            );
+            /**
+             * HashedPassword type
+             *
+             * {salt: string, password: string}
+             *
+             *
+             * {error: string}
+             *
+             */
+
+            console.log(HashedPassword);
+
+            // user.name = res.data.kakao_account.profile.nickname;
+            // user.age = res.data.kakao_account.email;
+            // user.salt = HashedPassword;
+            // user.access_token = token;
+            // user.refresh_token = refresh;
+          })
+          .catch((err) => console.error(err));
       } catch (e) {
         console.log('error', e.data);
       }
     }
-    console.log(await user);
   }
 
+  //access & refresh token generate
   async createToken() {
     const access_random = randomBytes(21).toString('base64').slice(0, 21);
     const refresh_random = randomBytes(21).toString('base64').slice(0, 21);
@@ -204,6 +222,7 @@ export class UsersService {
     };
   }
 
+  //check user validate
   async validateUser(username: string, pass: string): Promise<any> {
     if (username || pass) {
       // console.log(username, pass);
