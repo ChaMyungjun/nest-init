@@ -123,9 +123,6 @@ export class UsersService {
   //social login kakao && naver
   async socailLogin(code: string): Promise<any> {
     const state = code.split('&')[1].split('=')[1];
-
-    console.log(code, state, code.split('&')[0]);
-
     const url = 'https://kauth.kakao.com/oauth/token';
     const data = {
       grant_type: 'authorization_code',
@@ -143,7 +140,6 @@ export class UsersService {
     await axios
       .post(url, qs.stringify(data), axiosConfig)
       .then((res) => {
-        // console.log(res.data);
         if (state === 'kakao') {
           try {
             this.socialUserMe(
@@ -157,7 +153,7 @@ export class UsersService {
         }
       })
       .catch((err) => {
-        console.log(err.response?.data);
+        console.log('error', err.response?.data);
         throw new BadRequestException();
       });
   }
@@ -173,11 +169,7 @@ export class UsersService {
             },
           })
           .then(async (res) => {
-            // const user = new User();
-            const HashedPassword = await createHashedPassword(
-              res.data.id.toString(),
-              res.data.id.toString(),
-            );
+            const user = new User();
             /**
              * HashedPassword type
              *
@@ -187,14 +179,32 @@ export class UsersService {
              * {error: string}
              *
              */
+            const HashedPassword: any = await createHashedPassword(
+              res.data.id.toString(),
+              res.data.id.toString(),
+            );
 
-            console.log(HashedPassword);
+            // console.log(HashedPassword);
 
-            // user.name = res.data.kakao_account.profile.nickname;
-            // user.age = res.data.kakao_account.email;
-            // user.salt = HashedPassword;
-            // user.access_token = token;
-            // user.refresh_token = refresh;
+            user.name = res.data.kakao_account.profile.nickname;
+            user.age = res.data.kakao_account.email;
+            user.salt = HashedPassword;
+            user.access_token = token;
+            user.refresh_token = refresh;
+
+            const index = (await this.findAll()).find(
+              (cur: any) => cur.name === user.name || cur.email === user.email,
+            );
+
+            if (index) {
+              throw new BadRequestException();
+            } else {
+              this.userRepository.save(user);
+              return {
+                access: await (await token).accessToken,
+                refresh: await (await token).refreshToken,
+              };
+            }
           })
           .catch((err) => console.error(err));
       } catch (e) {
