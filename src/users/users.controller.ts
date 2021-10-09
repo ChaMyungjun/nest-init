@@ -11,6 +11,7 @@ import {
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { LocalAuthGuard } from './guards/local-auth.guard';
 import { CreateUserDto } from './../dto/CreateUser.dto';
 import { LoginUserDto } from './../dto/Loginuser.dto';
 import { UpdateUserDto } from './../dto/UpdateUser.dto';
@@ -75,6 +76,7 @@ export class UsersController {
     return this.usersService.update(updateData, req);
   }
 
+  @UseGuards(LocalAuthGuard)
   @Post('/login')
   @ApiOperation({
     summary: '유저 로그인 API',
@@ -85,14 +87,15 @@ export class UsersController {
     return this.usersService.login(loginUserData);
   }
 
+  // @UseGuards(JwtAuthGuard)
   @Post('/login/social')
   @ApiOperation({
     summary: '유저 소셜 로그인 API',
     description: '유저 소셜 로그인한다.',
   })
 
-  //https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=3040da9b120368bb91958c4d4eb5511e&redirect_uri=http://localhost:3000/user/kakao/auth&state=kakao
   @ApiResponse({ description: '유저 소셜 로그인 후 정보 저장.', type: User })
+  //https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=3040da9b120368bb91958c4d4eb5511e&redirect_uri=http://localhost:3000/user/kakao/auth&state=kakao
 
   async socialLogin(@Body() socialLoginData: { code: string }): Promise<any> {
     return this.usersService.socailLogin(socialLoginData.code);
