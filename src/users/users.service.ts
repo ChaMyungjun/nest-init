@@ -2,8 +2,6 @@
 import {
   Injectable,
   BadRequestException,
-  // HttpException,
-  // HttpStatus,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
@@ -41,14 +39,15 @@ export class UsersService {
   }
 
   //spect user find
-  async findOne(req: any): Promise<User> {
-    return this.userRepository.findOne(req.user.id);
+  async findOne(id: string): Promise<User> {
+    return this.userRepository.findOne(id);
   }
 
   //spect user delete
   async remove(req: any): Promise<void> {
     await this.userRepository.delete(req.user.id);
   }
+
   //user create
   async create(CreateUserDto: CreateUserDto): Promise<any> {
     const token = this.createToken();
@@ -86,7 +85,7 @@ export class UsersService {
 
   //spect user update
   async update(UpdateUserDto: UpdateUserDto, req: any): Promise<any> {
-    const index = await this.findOne(req);
+    const index = await this.findOne(req.user.id);
     if (!index) {
       throw new BadRequestException();
     } else {
@@ -144,8 +143,7 @@ export class UsersService {
           try {
             this.socialUserMe(
               state,
-              res.data?.access_token,
-              res.data?.refresh_token,
+              res, 
             );
           } catch (e) {
             throw new BadRequestException();
@@ -159,57 +157,65 @@ export class UsersService {
   }
 
   //social login me request
-  async socialUserMe(state: string, token, refresh) {
-    if (state === 'kakao' && token) {
-      try {
-        axios
-          .get('https://kapi.kakao.com/v2/user/me', {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          })
-          .then(async (res) => {
-            const user = new User();
-            /**
-             * HashedPassword type
-             *
-             * {salt: string, password: string}
-             *
-             *
-             * {error: string}
-             *
-             */
-            const HashedPassword: any = await createHashedPassword(
-              res.data.id.toString(),
-              res.data.id.toString(),
-            );
+  async socialUserMe(state: string, res: any) {
+    // res.data?.access_token,
+    // res.data?.refresh_token,
+    if (state === 'kakao' && res.data?.access_totken) {
+      // const user = await this.userRepository.findOne()
+      await this.socialKakaoCreateUser(res.data?.access_token, res.data?.refresh_token)
+    } else if (state === 'naver' && res.data?.access_token) {
+      //naver login processing
+    }
+  }
 
-            // console.log(HashedPassword);
+  async socialKakaoCreateUser (token, refresh) {
+    try {
+      axios
+        .get('https://kapi.kakao.com/v2/user/me', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then(async (res) => {
+          const user = new User();
+          /**
+           * HashedPassword type
+           *
+           * {salt: string, password: string}
+           *
+           *
+           * {error: string}
+           *
+           */
+          const HashedPassword: any = await createHashedPassword(
+            res.data.id.toString(),
+            res.data.id.toString(),
+          );
+          
+          user.name = res.data.kakao_account.profile.nickname;
+          user.password = HashedPassword.password
+          user.age = res.data.kakao_account.email;
+          user.salt = HashedPassword.salt;
+          user.access_token = token;
+          user.refresh_token = refresh;
 
-            user.name = res.data.kakao_account.profile.nickname;
-            user.age = res.data.kakao_account.email;
-            user.salt = HashedPassword;
-            user.access_token = token;
-            user.refresh_token = refresh;
+          const index = (await this.findAll()).find(
+            (cur: any) => cur.name === user.name || cur.email === user.email,
+          );
 
-            const index = (await this.findAll()).find(
-              (cur: any) => cur.name === user.name || cur.email === user.email,
-            );
-
-            if (index) {
-              throw new BadRequestException();
-            } else {
-              this.userRepository.save(user);
-              return {
-                access: await (await token).accessToken,
-                refresh: await (await token).refreshToken,
-              };
-            }
-          })
-          .catch((err) => console.error(err));
-      } catch (e) {
-        console.log('error', e.data);
-      }
+          if (index) {
+            throw new BadRequestException();
+          } else {
+            this.userRepository.save(user);
+            return {
+              access: await (await token).accessToken,
+              refresh: await (await token).refreshToken,
+            };
+          }
+        })
+        .catch((err) => console.error(err));
+    } catch (e) {
+      console.log('error', e.data);
     }
   }
 

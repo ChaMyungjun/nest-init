@@ -19,7 +19,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-    // console.log(payload.exp);
+    console.log("asdfasdf");
     // const JwtExpDate = new Date(payload.exp);
     // console.log(JwtExpDate);
     const findUser = await this.usersService.findAll();
