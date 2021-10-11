@@ -1,8 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import {
-  Injectable,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -95,28 +92,34 @@ export class UsersService {
   }
 
   //user login
-  async login(userData: LoginUserDto): Promise<any> {
-    const token = this.createToken();
-    const index = (await this.findAll()).find(
-      (cur) => cur.email === userData.email,
-    );
+  async login(user: any): Promise<any> {
+    // const token = this.createToken();
+    // const index = (await this.findAll()).find(
+    //   (cur) => cur.email === user.email,
+    // );
 
-    const password = await makePasswordHashed(index, userData.password);
+    // const password = await makePasswordHashed(index, userData.password);
 
-    if (!index || index.password !== password) {
-      throw new BadRequestException();
-    } else {
-      const updateToken: any = index;
-      const access_token = (await token).accessToken;
-      const refresh_token = (await token).refreshToken;
-      updateToken.access_token = access_token;
-      updateToken.refresh_token = refresh_token;
-      this.userRepository.update(updateToken.id, updateToken);
-      return {
-        acces: updateToken.access_token,
-        refresh: updateToken.refresh_token,
-      };
-    }
+    // if (!index || index.password !== password) {
+    //   throw new BadRequestException();
+    // } else {
+    //   const updateToken: any = index;
+    //   const access_token = (await token).accessToken;
+    //   const refresh_token = (await token).refreshToken;
+    //   updateToken.access_token = access_token;
+    //   updateToken.refresh_token = refresh_token;
+    //   this.userRepository.update(updateToken.id, updateToken);
+    //   return {
+    //     acces: updateToken.access_token,
+    //     refresh: updateToken.refresh_token,
+    //   };
+    // }
+    
+    const payload = { id: user.id, email: user.email };
+
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
   }
 
   //social login kakao && naver
@@ -141,10 +144,7 @@ export class UsersService {
       .then((res) => {
         if (state === 'kakao') {
           try {
-            this.socialUserMe(
-              state,
-              res, 
-            );
+            this.socialUserMe(state, res);
           } catch (e) {
             throw new BadRequestException();
           }
@@ -162,13 +162,16 @@ export class UsersService {
     // res.data?.refresh_token,
     if (state === 'kakao' && res.data?.access_totken) {
       // const user = await this.userRepository.findOne()
-      await this.socialKakaoCreateUser(res.data?.access_token, res.data?.refresh_token)
+      await this.socialKakaoCreateUser(
+        res.data?.access_token,
+        res.data?.refresh_token,
+      );
     } else if (state === 'naver' && res.data?.access_token) {
       //naver login processing
     }
   }
 
-  async socialKakaoCreateUser (token, refresh) {
+  async socialKakaoCreateUser(token, refresh) {
     try {
       axios
         .get('https://kapi.kakao.com/v2/user/me', {
@@ -191,9 +194,9 @@ export class UsersService {
             res.data.id.toString(),
             res.data.id.toString(),
           );
-          
+
           user.name = res.data.kakao_account.profile.nickname;
-          user.password = HashedPassword.password
+          user.password = HashedPassword.password;
           user.age = res.data.kakao_account.email;
           user.salt = HashedPassword.salt;
           user.access_token = token;
@@ -239,11 +242,18 @@ export class UsersService {
   }
 
   //check user validate
-  async validateUser(username: string, pass: string): Promise<any> {
-    if (username || pass) {
-      // console.log(username, pass);
+  async validateUser(email: string, password: string): Promise<any> {
+    const user = await (
+      await this.findAll()
+    ).find((cur) => cur.email === email);
+
+    const HasehdPassword = await makePasswordHashed(user, password);
+
+    if (user && user.password === HasehdPassword) {
+      const { password, ...result } = user;
+      return result;
     }
-    return { username, pass };
+    return null;
   }
 
   //cluster testing
