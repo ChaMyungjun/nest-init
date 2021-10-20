@@ -2,7 +2,7 @@ import { SmsService } from './sms.service';
 import { Controller, Get } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-@Controller('sms')
+@Controller('api/sms')
 @ApiTags('유저 API')
 export class SmsController {
   constructor(private readonly smsService: SmsService) {}
@@ -14,6 +14,6 @@ export class SmsController {
   })
   @ApiResponse({ description: '문자 전송을 해주는 API.' })
   async getTest(): Promise<string> {
-    return null;
+    return this.smsService.sendSms();
   }
 }
