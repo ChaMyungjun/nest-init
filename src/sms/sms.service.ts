@@ -9,19 +9,6 @@ export class SmsService {
       apiSecret: 'AMZPOOLDTZMLYG84UTDOQWXRKYAGA9FA',
     });
 
-    const TestData = {
-      messages: [{ to: '01054454022', from: '01054454022', text: 'test' }],
-    };
-
-    try {
-      const result = await msg.send(TestData);
-      console.log(result);
-    } catch (err) {
-      console.error('Error Status Code: ', err.statusCode);
-      console.error('Error Code: ', err.error.errorCode);
-      console.error('Error Error Message: ', err.error.errorMessage);
-    }
-
     //example data
     // messages: [
     //     {
@@ -38,5 +25,21 @@ export class SmsService {
     //     // ...
     //     // 1만건까지 추가 가능
     //   ]
+
+    const TestData = {
+      messages: [{ to: '01054454022', from: '01054454022', text: 'test' }],
+    };
+
+    let result = {};
+
+    try {
+      result = await msg.send(TestData);
+    } catch (err) {
+      console.error('Error Status Code: ', err.statusCode);
+      console.error('Error Code: ', err.error.errorCode);
+      console.error('Error Error Message: ', err.error.errorMessage);
+    }
+
+    return result;
   }
 }
