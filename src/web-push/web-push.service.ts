@@ -8,6 +8,7 @@ export class WebPushService {
   tokenList: PushSubscription[] = [];
 
   async TokenRegister(subscription: any): Promise<any> {
+    console.log(subscription);
     this.tokenList.push(subscription);
 
     return 'success';
@@ -17,7 +18,7 @@ export class WebPushService {
     const options = {
       TTL: 24 * 60 * 60,
       vapidDetails: {
-        subject: 'http://localhost:3000',
+        subject: 'http://localhost:8000',
         publicKey: PublicKey,
         privateKey: PrivateKey,
       },
