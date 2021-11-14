@@ -1,5 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  HttpStatus,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -40,6 +45,10 @@ export class UsersService {
     return this.userRepository.findOne(id);
   }
 
+  async findEmailOne(email: string): Promise<User> {
+    return this.userRepository.findOne(email);
+  }
+
   //spect user delete
   async remove(req: any): Promise<void> {
     await this.userRepository.delete(req.user.id);
@@ -70,13 +79,21 @@ export class UsersService {
     );
 
     if (index) {
-      throw new BadRequestException();
+      throw new ForbiddenException({
+        statusCode: HttpStatus.FORBIDDEN,
+        message: [`이미 등록된 사용자 입니다`],
+        error: 'Forbidden',
+      });
     } else {
-      this.userRepository.save(user);
-      return {
-        access: await (await token).accessToken,
-        refresh: await (await token).refreshToken,
-      };
+      // save user info in mongodb
+      try {
+        this.userRepository.save(user);
+      } catch (error) {
+        return {
+          ...error,
+        };
+      }
+      return { statusCode: HttpStatus.CREATED };
     }
   }
 
@@ -114,7 +131,7 @@ export class UsersService {
     //     refresh: updateToken.refresh_token,
     //   };
     // }
-    
+
     const payload = { id: user.id, email: user.email };
 
     return {
@@ -243,9 +260,8 @@ export class UsersService {
 
   //check user validate
   async validateUser(email: string, password: string): Promise<any> {
-    const user = await (
-      await this.findAll()
-    ).find((cur) => cur.email === email);
+    const user = await this.findEmailOne(email);
+    console.log(user);
 
     const HasehdPassword = await makePasswordHashed(user, password);
 
@@ -253,7 +269,8 @@ export class UsersService {
       const { password, ...result } = user;
       return result;
     }
-    return null;
+
+    return user;
   }
 
   //cluster testing

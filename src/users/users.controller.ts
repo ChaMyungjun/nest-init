@@ -83,8 +83,9 @@ export class UsersController {
     description: '유저 로그인한다.',
   })
   @ApiResponse({ description: '유저 로그인한다.', type: User })
-  async login(@Body() loginUserData: LoginUserDto): Promise<void> {
-    return this.usersService.login(loginUserData);
+  async login(@Request() loginUserData: LoginUserDto): Promise<void> {
+    console.log(loginUserData);
+    // return this.usersService.login(loginUserData);
   }
 
   // @UseGuards(JwtAuthGuard)
@@ -93,10 +94,8 @@ export class UsersController {
     summary: '유저 소셜 로그인 API',
     description: '유저 소셜 로그인한다.',
   })
-
   @ApiResponse({ description: '유저 소셜 로그인 후 정보 저장.', type: User })
   //https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=3040da9b120368bb91958c4d4eb5511e&redirect_uri=http://localhost:3000/user/kakao/auth&state=kakao
-
   async socialLogin(@Body() socialLoginData: { code: string }): Promise<any> {
     return this.usersService.socailLogin(socialLoginData.code);
   }

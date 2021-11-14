@@ -19,7 +19,6 @@ import { jwtConstant } from './constants';
       secret: jwtConstant.secret,
       signOptions: { expiresIn: '1d' },
     }),
-    // PassportModule.register({ defaultStrategy: 'jwt', session: true }),
   ],
   controllers: [UsersController],
   providers: [UsersService, JwtStrategy, LocalStrategy],
