@@ -261,6 +261,7 @@ export class UsersService {
   //check user validate
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.findEmailOne(email);
+    console.log(user);
 
     const HasehdPassword = await makePasswordHashed(user, password);
 
